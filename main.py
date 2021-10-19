@@ -35,12 +35,13 @@ class Login(QDialog):
 
     def displayLogin(self):
         password = self.passwordInput.text()
-        data = ('Apple', 'www.apple.com', 'jeff', 'colt@123')
-        insert_new = "INSERT INTO vault (site_name, website, username, password) VALUES(?, ?, ?, ?);"
-        cursor.execute(insert_new, data)
-        db.commit()
+        # TODO Check if user input password match with master password in DB
+        # Display the vault window (widget)
         window = ShowVault()
-        print(f"clicked on the login Button and enter password: {password}")
+        widget.addWidget(window)
+        widget.setCurrentIndex(widget.currentIndex() + 1)
+        widget.setFixedWidth(833)
+        widget.setFixedHeight(504)
 
 class MasterPassword(QDialog):
     def __init__(self):
@@ -54,12 +55,23 @@ class MasterPassword(QDialog):
         if self.masterPass.text() == self.masterPassConfirm.text():
             password = self.masterPass.text()
 
+            # encode master password and store in database
             set_hash = HashPassword()
             hashPassword = set_hash.hash_password(self.masterPass.text().encode('utf-8'))
             insert_password = """ INSERT INTO master_password(password) VALUES(?) """
             cursor.execute(insert_password, [(hashPassword)])
             db.commit()
             print(f"Successful created master password: {password}")
+
+            # Display the login window (widget)
+            window = Login()
+            widget.addWidget(window)
+            widget.setCurrentIndex(widget.currentIndex()+1)
+            widget.setFixedWidth(346)
+            widget.setFixedHeight(427)
+
+
+
 
 
 class ShowVault(QDialog):
@@ -68,6 +80,7 @@ class ShowVault(QDialog):
         loadUi("password_show_vault.ui", self)
         self.show_data_in_table()
 
+    # Get data from the database to populate the table rows
     def show_data_in_table(self):
         cursor.execute("SELECT * FROM vault")
         row_fetchall = cursor.fetchall()
@@ -84,6 +97,8 @@ class ShowVault(QDialog):
 
         self.addButton.clicked.connect(self.add_new_password)
 
+
+    # Add a new password to the vault
     def add_new_password(self):
         sitename = self.siteName.text()
         siteurl = self.siteUrl.text()
@@ -94,18 +109,19 @@ class ShowVault(QDialog):
         insert_new = "INSERT INTO vault (site_name, website, username, password) VALUES(?, ?, ?, ?);"
         cursor.execute(insert_new, data)
         db.commit()
-        self.tableWidget.setRowCount(0) # Clear the table
+        # Clear the table
+        self.tableWidget.setRowCount(0)
+        # call function to reload table with the new data
         self.show_data_in_table()
 
 
 app = QApplication(sys.argv)
 
-
+# Check if a master password was already created
 def show_window():
     cursor.execute("SELECT * FROM master_password")
     if cursor.fetchall():
-        #window = Login()
-        window = ShowVault()
+        window = Login()
     else:
         window = MasterPassword()
     return window
@@ -113,11 +129,9 @@ def show_window():
 window = show_window()
 widget = QtWidgets.QStackedWidget()
 widget.addWidget(window)
-#widget.setFixedWidth(346)
-#widget.setFixedHeight(427)
+widget.setFixedWidth(346)
+widget.setFixedHeight(427)
 
-widget.setFixedWidth(833)
-widget.setFixedHeight(504)
 widget.show()
 app.exec_()
 
