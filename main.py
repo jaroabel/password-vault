@@ -34,7 +34,6 @@ class Login(QDialog):
 
     def displayLogin(self):
         password = self.passwordInput.text()
-        # TODO Check if user input password match with master password in DB
         # Display the vault window (widget)
         window = ShowVault()
         widget.addWidget(window)
