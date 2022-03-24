@@ -131,3 +131,5 @@ dmypy.json
 # My files
 password_vault.db
 .idea/
+.DS_Store
+._.DS_Store
