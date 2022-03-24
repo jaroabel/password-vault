@@ -7,7 +7,6 @@ from PyQt5.uic import loadUi
 from dbmodel import db_queries
 
 # Database code
-# Database code
 with sqlite3.connect("password_vault.db") as db:
     cursor = db.cursor()
 
