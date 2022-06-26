@@ -7,11 +7,14 @@ db_queries = {
         """,
     "login": """
         CREATE TABLE IF NOT EXISTS vault(
-        id INTEGER PRIMARY KEY,
-        site_name TEXT NOT NULL,
-        website TEXT NOT NULL,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL);
+        id	INTEGER,
+        site_name	TEXT NOT NULL,
+        website	TEXT NOT NULL,
+        username	TEXT NOT NULL,
+        password	TEXT NOT NULL,
+        serial_number	TEXT,
+        PRIMARY KEY(id)
+        );
         """,
     "insert": """['Google', 'www.google.com', 'joum', 'Test-123'],
         ['Northon', 'www.northon.com', 'jaro', 'jaro-123'],

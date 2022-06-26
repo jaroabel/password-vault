@@ -1,20 +1,20 @@
 import sys
 import sqlite3, hashlib
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem
+from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 
 from dbmodel import db_queries
 
-# Database code
+# Database connextion
 with sqlite3.connect("password_vault.db") as db:
     cursor = db.cursor()
 
 cursor.execute(db_queries['master'])
 cursor.execute(db_queries['login'])
 
-# db_conn = Dbconnect()
 
+# Create hashed password
 class HashPassword():
     def __init__(self):
         self.hash = ""
@@ -25,7 +25,8 @@ class HashPassword():
         return self.hash
 
 
-class Login(QDialog):
+# Login window
+class Login(QDialog, HashPassword):
     def __init__(self):
         super(Login, self).__init__()
         loadUi("welcompage.ui", self)
@@ -34,13 +35,24 @@ class Login(QDialog):
 
     def displayLogin(self):
         password = self.passwordInput.text()
-        # Display the vault window (widget)
-        window = ShowVault()
-        widget.addWidget(window)
-        widget.setCurrentIndex(widget.currentIndex() + 1)
-        widget.setFixedWidth(833)
-        widget.setFixedHeight(504)
+        # check if password exist in DB
+        get_hash_password = self.hash_password(password.encode('utf-8')) # convert text password to hash
+        qry = "SELECT * FROM master_password WHERE password = ?"
+        cursor.execute(qry, (get_hash_password,))
+        if cursor.fetchall():
+            # Display the vault window (widget)
+            window = ShowVault()
+            widget.addWidget(window)
+            widget.setCurrentIndex(widget.currentIndex() + 1)
+            widget.setFixedWidth(884)
+            widget.setFixedHeight(652)
+        else:
+            QMessageBox.information(self, "Warning", "Sorry no matching password!\nPLease try again")
 
+
+
+
+# Master password window
 class MasterPassword(QDialog):
     def __init__(self):
         super(MasterPassword, self).__init__()
@@ -71,7 +83,7 @@ class MasterPassword(QDialog):
 
 
 
-
+# show vault
 class ShowVault(QDialog):
     def __init__(self):
         super(ShowVault, self).__init__()
@@ -91,6 +103,7 @@ class ShowVault(QDialog):
             self.tableWidget.setItem(cnt, 2, QTableWidgetItem(row[2]))
             self.tableWidget.setItem(cnt, 3, QTableWidgetItem(row[3]))
             self.tableWidget.setItem(cnt, 4, QTableWidgetItem(row[4]))
+            self.tableWidget.setItem(cnt, 5, QTableWidgetItem(row[5]))
             cnt = cnt + 1
 
         self.addButton.clicked.connect(self.add_new_password)
